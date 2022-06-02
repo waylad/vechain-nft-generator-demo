@@ -1,139 +1,173 @@
-import Connex from '@vechain/connex'
-import { CONST, ShipToken } from '../const/const'
-const spaceshipAbi = require('./abi/Spaceships.json')
-const alphaTokenAbi = require('./abi/AlphaToken.json')
+import Connex from "@vechain/connex";
 
-// declare var window: any
-// let provider: ethers.providers.Web3Provider
-// let signer: ethers.providers.JsonRpcSigner
-// let address: string
-// let spaceshipContractWithSigner: ethers.Contract
-// let alphaTokenContractWithSigner: ethers.Contract
+import { CONST, ShipToken } from "../const/const";
 
-// const connex = new Connex({
-//   node: 'https://testnet.veblocks.net/',
-//   network: 'test'
-// })
+let connex: Connex;
+const address = "0x6940F7Cf59FBbBE0aA4FEec3aa2A19dAf12aC23c";
+const DELEGATE_URL = "https://sponsor-testnet.vechain.energy/by/90";
 
 export const connectWallet = async () => {
   try {
-    // provider = new ethers.providers.Web3Provider(window.ethereum)
-
-    // await provider.send('eth_requestAccounts', [])
-
-    // window.ethereum.request({
-    //   method: 'wallet_addEthereumChain',
-    //   params: [
-    //     {
-    //       chainId: '0xf2',
-    //       rpcUrls: ['https://dev.vechain.io/'],
-    //       chainName: 'Vechain Testnet',
-    //       nativeCurrency: {
-    //         name: 'KAI',
-    //         symbol: 'KAI',
-    //         decimals: 18,
-    //       },
-    //       blockExplorerUrls: null,
-    //     },
-    //   ],
-    // })
-
-    // signer = provider.getSigner()
-    // address = await signer.getAddress()
-
-    // const spaceshipContract = new ethers.Contract(CONST.SPACESHIP_CONTRACT, spaceshipAbi, provider)
-    // spaceshipContractWithSigner = spaceshipContract.connect(signer)
-
-    // const alphaTokenContract = new ethers.Contract(CONST.ALPHA_TOKEN_CONTRACT, alphaTokenAbi, provider)
-    // alphaTokenContractWithSigner = alphaTokenContract.connect(signer)
-
-    // console.log(address)
+    connex = new Connex({
+      node: "https://testnet.veblocks.net/",
+      network: "test",
+    });
   } catch (e: any) {
-    window.location.reload()
+    // window.location.reload()
   }
-}
+};
+
+const tokenOfOwnerByIndex: (
+  address: string,
+  index: number
+) => Promise<number> = async (address: string, index: number) => {
+  return new Promise((resolve) => {
+    //  "function tokenOfOwnerByIndex(uint256) view returns (uint256)",
+    const tokenOfOwnerByIndexAbi = {
+      constant: false,
+      inputs: [
+        { name: "_address", type: "address" },
+        { name: "_indexId", type: "uint256" },
+      ],
+      name: "tokenOfOwnerByIndex",
+      outputs: [{ name: "_tokenId", type: "uint256" }],
+      payable: false,
+      stateMutability: "payable",
+      type: "function",
+    };
+
+    const tokenOfOwnerByIndexMethod = connex.thor
+      .account(CONST.SPACESHIP_CONTRACT)
+      .method(tokenOfOwnerByIndexAbi);
+
+    tokenOfOwnerByIndexMethod
+      .call(address, index)
+      .then((tokenOfOwnerByIndexOutput) => {
+        resolve(tokenOfOwnerByIndexOutput.decoded._tokenId);
+      });
+  });
+};
+
+const _tokenToShipCode: (tokenId: number) => Promise<string> = async (
+  tokenId: number
+) => {
+  return new Promise((resolve) => {
+    //  "function _tokenToShipCode(uint256) view returns (string)",
+    const _tokenToShipCodeAbi = {
+      constant: false,
+      inputs: [{ name: "_tokenId", type: "uint256" }],
+      name: "_tokenToShipCode",
+      outputs: [{ name: "shipCode", type: "string" }],
+      payable: false,
+      stateMutability: "payable",
+      type: "function",
+    };
+
+    const _tokenToShipCodeMethod = connex.thor
+      .account(CONST.SPACESHIP_CONTRACT)
+      .method(_tokenToShipCodeAbi);
+
+    _tokenToShipCodeMethod.call(tokenId).then((_tokenToShipCodeOutput) => {
+      resolve(_tokenToShipCodeOutput.decoded.shipCode);
+    });
+  });
+};
 
 export const getShips = async () => {
   try {
-    // const shipId1 = await spaceshipContractWithSigner.tokenOfOwnerByIndex(address, 1)
-    // const shipId2 = await spaceshipContractWithSigner.tokenOfOwnerByIndex(address, 2)
-    // const shipId3 = await spaceshipContractWithSigner.tokenOfOwnerByIndex(address, 3)
-    // const shipId4 = await spaceshipContractWithSigner.tokenOfOwnerByIndex(address, 4)
+    const shipId1 = await tokenOfOwnerByIndex(address, 1);
+    const shipId2 = await tokenOfOwnerByIndex(address, 2);
+    const shipId3 = await tokenOfOwnerByIndex(address, 3);
+    const shipId4 = await tokenOfOwnerByIndex(address, 4);
 
-    // const shipCode1 = await spaceshipContractWithSigner._tokenToShipCode(shipId1)
-    // const shipCode2 = await spaceshipContractWithSigner._tokenToShipCode(shipId2)
-    // const shipCode3 = await spaceshipContractWithSigner._tokenToShipCode(shipId3)
-    // const shipCode4 = await spaceshipContractWithSigner._tokenToShipCode(shipId4)
+    const shipCode1 = await _tokenToShipCode(shipId1);
+    const shipCode2 = await _tokenToShipCode(shipId2);
+    const shipCode3 = await _tokenToShipCode(shipId3);
+    const shipCode4 = await _tokenToShipCode(shipId4);
 
-    // CONST.USER_SHIPS = [
-    //   {
-    //     tokenId: shipId1,
-    //     shipCode: shipCode1,
-    //   },
-    //   {
-    //     tokenId: shipId2,
-    //     shipCode: shipCode2,
-    //   },
-    //   {
-    //     tokenId: shipId3,
-    //     shipCode: shipCode3,
-    //   },
-    //   {
-    //     tokenId: shipId4,
-    //     shipCode: shipCode4,
-    //   },
-    // ]
-    // console.log(CONST.USER_SHIPS)
-
-      CONST.USER_SHIPS = [
+    CONST.USER_SHIPS = [
       {
-        tokenId: 0,
-        shipCode: '0000',
+        tokenId: shipId1,
+        shipCode: shipCode1,
       },
       {
-        tokenId: 1,
-        shipCode: '1111',
+        tokenId: shipId2,
+        shipCode: shipCode2,
       },
       {
-        tokenId: 2,
-        shipCode: '2222',
+        tokenId: shipId3,
+        shipCode: shipCode3,
       },
       {
-        tokenId: 3,
-        shipCode: '3333',
+        tokenId: shipId4,
+        shipCode: shipCode4,
       },
-    ]
+    ];
+    console.log(CONST.USER_SHIPS);
   } catch (e: any) {
-    window.location.reload()
+    // window.location.reload()
   }
-}
+};
 
 export const mintShip = async () => {
-  // const tx = await spaceshipContractWithSigner.mintShip(address)
-  // const confirmation = await provider.getTransactionReceipt(tx.hash)
-  // console.log(confirmation)
-}
+  //"function mintShip() returns (uint256)"
+  const mintShipAbi: any = {
+    constant: false,
+    inputs: [{ name: "_address", type: "address" }],
+    name: "mintShip",
+    outputs: [{ name: "_tokenId", type: "uint256" }],
+    payable: true,
+    stateMutability: "payable",
+    type: "function",
+  };
+
+  const contract = connex.thor.account(CONST.SPACESHIP_CONTRACT);
+  const clauses = [contract.method(mintShipAbi).asClause(address)];
+  const { txid } = await connex.vendor
+    .sign("tx", clauses)
+    .delegate(DELEGATE_URL)
+    .comment("Mint new ship")
+    .request();
+
+  alert(txid);
+};
 
 export const upgradeShip = async (ship: ShipToken) => {
-  // const tx = await spaceshipContractWithSigner.upgradeShip(ship.tokenId, ship.shipCode)
-  // const confirmation = await provider.getTransactionReceipt(tx.hash)
-  // console.log(confirmation)
-}
+  //"function upgradeShip(uint256,string)"
+  const upgradeShipAbi: any = {
+    constant: false,
+    inputs: [
+      { name: "_tokenId", type: "uint256" },
+      { name: "_shipCode", type: "string" },
+    ],
+    name: "upgradeShip",
+    outputs: [],
+    payable: true,
+    stateMutability: "payable",
+    type: "function",
+  };
+
+  const contract = connex.thor.account(CONST.SPACESHIP_CONTRACT);
+  const clauses = [
+    contract.method(upgradeShipAbi).asClause(ship.tokenId, ship.shipCode),
+  ];
+  const { txid } = await connex.vendor
+    .sign("tx", clauses)
+    .delegate(DELEGATE_URL)
+    .comment("Upgrade ship")
+    .request();
+
+  alert(txid);
+};
 
 export const getAlphaBalance = async () => {
-  // const alphaBalance = await alphaTokenContractWithSigner.balanceOf(address)
-  // CONST.ALPHA_BALANCE = alphaBalance.toNumber()
-  // console.log(alphaBalance.toNumber(), 'ALPHAS')
-}
+  // TODO
+};
 
 export const mintAlphas = async () => {
-  // const tx = await alphaTokenContractWithSigner.mint(address, 1000)
-  // const confirmation = await provider.getTransactionReceipt(tx.hash)
-  // console.log(confirmation)
-}
+  // TODO
+};
 
 export const burnAlphas = async () => {
-  // const tx = await alphaTokenContractWithSigner.burn(1000)
-  // const confirmation = await provider.getTransactionReceipt(tx.hash)
-  // console.log(confirmation)
-}
+  // TODO
+};

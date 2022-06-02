@@ -72,7 +72,7 @@ export class Game extends Phaser.Scene {
       gravityY: 800,
     })
 
-    let buttonInventory = this.add.image(400, this.sys.canvas.height - 100, 'buttonInventory')
+    let buttonInventory = this.add.image(250, this.sys.canvas.height - 100, 'buttonInventory')
     buttonInventory.setInteractive({ cursor: 'pointer' })
     buttonInventory.on('pointerover', () => buttonInventory.setTexture('buttonInventoryHover'))
     buttonInventory.on('pointerout', () => buttonInventory.setTexture('buttonInventory'))
@@ -82,18 +82,6 @@ export class Game extends Phaser.Scene {
       this.drops.forEach((drop) => drop.destroy())
       this.drops = []
       this.scene.start('Inventory')
-    })
-
-    let buttonShop = this.add.image(250, this.sys.canvas.height - 100, 'buttonShop')
-    buttonShop.setInteractive({ cursor: 'pointer' })
-    buttonShop.on('pointerover', () => buttonShop.setTexture('buttonShopHover'))
-    buttonShop.on('pointerout', () => buttonShop.setTexture('buttonShop'))
-    buttonShop.on('pointerdown', () => {
-      this.sound.add('clickSound').play()
-      this.enemy.destroy()
-      this.drops.forEach((drop) => drop.destroy())
-      this.drops = []
-      this.scene.start('Shop')
     })
 
     let buttonBack = this.add.image(100, this.sys.canvas.height - 100, 'buttonBack')
